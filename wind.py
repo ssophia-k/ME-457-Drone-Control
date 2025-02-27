@@ -3,7 +3,7 @@ Class to determine wind velocity at any given moment,
 calculates a steady wind speed and uses a stochastic
 process to represent wind gusts. (Follows section 4.4 in uav book)
 """
-from tools.transfer_function import TransferFunction
+from Tools.transfer_function import TransferFunction
 import numpy as np
 
 
@@ -14,6 +14,7 @@ class WindSimulation:
         ##### TODO #####
 
         #   Dryden gust model parameters (pg 56 UAV book)
+        
 
         # Dryden transfer functions (section 4.4 UAV book) - Fill in proper num and den
         self.u_w = TransferFunction(num=np.array([[0]]), den=np.array([[1,1]]),Ts=Ts)

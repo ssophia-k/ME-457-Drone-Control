@@ -74,7 +74,7 @@ u_r = u_0 -1
 v_r = v_0 -1
 w_r = w_0 -1
 
-#angle of attack and sideslip[] angles
+#angle of attack and sideslip angles
 alpha = np.arctan(w_r/u_r)
 beta = np.arcsin(v_r / np.sqrt(u_r**2 + v_r**2 + w_r**2))
 
