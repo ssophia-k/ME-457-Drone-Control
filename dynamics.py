@@ -1,7 +1,6 @@
 import numpy as np
 import parameters as MAV
 from state import State
-from integrators import RK4
 
 
 class Dynamics:
