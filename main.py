@@ -4,6 +4,9 @@ from dynamics_control import MavDynamics
 from delta import Delta
 from mpl_toolkits.mplot3d import Axes3D
 
+#We currently have some issues wrt scalar math overflow
+#If this remains an issue, we can decrease the dt value.
+#Fix coming soon.
 dt = 0.001
 num_steps = 5000
 t = np.linspace(0, dt*num_steps, num_steps)
