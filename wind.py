@@ -1,3 +1,6 @@
+#####TODO ..... NOT IN USE#######
+
+
 """
 Class to determine wind velocity at any given moment,
 calculates a steady wind speed and uses a stochastic
