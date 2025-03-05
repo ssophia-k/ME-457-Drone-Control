@@ -4,9 +4,9 @@ import numpy as np
 pn_0 = 0 #position, north
 pe_0 = 0 #east
 pd_0 = 0 #down
-u_0 = 10 #velocity, north
+u_0 = 0 #velocity, north
 v_0 = 0 #east
-w_0 = 0 #down
+w_0 = -1 #down
 phi_0 = 0 #orientation, roll
 theta_0 = 0 #pitch
 psi_0 = 0 #yaw

@@ -15,7 +15,7 @@ t = np.linspace(0, dt*num_steps, num_steps)
 MAV = MavDynamics(Ts=dt)
 
 #Control input
-delta = Delta(elevator=0.0, aileron=0.0, rudder=0.0, throttle=0.0) 
+delta = Delta(elevator=0.0, aileron=0.0, rudder=0.0, throttle=0.05) 
 
 #Wind vector (ss and gust), zero for now
 wind = np.zeros((6, 1))
