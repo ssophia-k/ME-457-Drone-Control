@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from dynamics_control import MavDynamics
 from delta import Delta
 from mpl_toolkits.mplot3d import Axes3D
+from wind import WindSimulation
+from trim import compute_trim
 
 #We currently have some issues wrt scalar math overflow
 #If this remains an issue, we can decrease the dt value.
@@ -14,22 +16,36 @@ t = np.linspace(0, dt*num_steps, num_steps)
 #MAV dynamics object
 MAV = MavDynamics(Ts=dt)
 
-#Control input
-delta = Delta(elevator=0.0, aileron=0.0, rudder=0.0, throttle=0.0) 
+#Wind Simulation Object
+WIND_SIM = WindSimulation(Ts = dt, gust_flag=False, steady_state = np.array([[0., 0., 0.]]).T)
 
-#Wind vector (ss and gust), zero for now
-wind = np.zeros((6, 1))
+#Trim Conditions
+Va = 15.0
+gamma = 0.4
+trim_state, trim_input = compute_trim(MAV, Va, gamma)
+
+#Set initial conditions
+MAV._state = trim_state 
+delta_array = np.array([trim_input.elevator, trim_input.aileron, trim_input.rudder, trim_input.throttle])
+delta = Delta()
+delta.from_array(delta_array) 
+
+#Control input
+# delta = Delta(elevator=0.0, aileron=0.0, rudder=0.0, throttle=0.0) 
 
 #Array to store state history
 # 9 state variables (north, east, down, u, v, w, p, q, r, phi, theta, psi)
 state_history = np.zeros((num_steps, 12))  
+wind_history = np.zeros((num_steps, 6))
 
 #Integrate it up!
 for i in range(num_steps):
+    wind = WIND_SIM.update()
     MAV.update(delta, wind)
 
     # Store all state variables in one row
     state_history[i, :] = MAV._state[:12, 0]  
+    wind_history[i, :] = wind[:6, 0]  
 
 north = state_history[:, 0]
 east = state_history[:, 1]
@@ -53,7 +69,6 @@ ax.set_zlabel('Down (m)')
 ax.set_title('3D Flight Path')
 ax.legend()
 plt.show()
-
 
 fig, axs = plt.subplots(4, 1, figsize=(15, 8))
 
@@ -80,6 +95,27 @@ axs[3].plot(t, q, label='q')
 axs[3].plot(t, r, label='r')
 axs[3].set_title('Angular Velocity')
 axs[3].legend()
+
+plt.tight_layout()
+plt.show()
+
+#Plot wind
+fig, axs = plt.subplots(2, 1, figsize=(15, 8))
+
+#Components
+axs[0].plot(t, wind_history[:, 0], label='u_s')
+axs[0].plot(t, wind_history[:, 1], label='v_s')
+axs[0].plot(t, wind_history[:, 2], label='w_s')
+axs[0].plot(t, wind_history[:, 3], label='u_g')
+axs[0].plot(t, wind_history[:, 4], label='v_g')
+axs[0].plot(t, wind_history[:, 5], label='w_g')
+axs[0].set_title('Wind')
+axs[0].legend()
+
+#Magnitude
+axs[1].plot(t, np.sqrt((wind_history[:, 0]+wind_history[:, 3])**2 + (wind_history[:, 1]+wind_history[:, 4])**2 + (wind_history[:, 2]+wind_history[:, 5])**2), label='Wind Magnitude')
+axs[1].set_title('Wind Magnitude')
+axs[1].legend()
 
 plt.tight_layout()
 plt.show()
