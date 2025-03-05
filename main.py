@@ -20,8 +20,8 @@ MAV = MavDynamics(Ts=dt)
 WIND_SIM = WindSimulation(Ts = dt, gust_flag=False, steady_state = np.array([[0., 0., 0.]]).T)
 
 #Trim Conditions
-Va = 15.0
-gamma = 0.4
+Va = 10.0
+gamma = 0.1
 trim_state, trim_input = compute_trim(MAV, Va, gamma)
 
 #Set initial conditions
@@ -34,7 +34,7 @@ delta.from_array(delta_array)
 # delta = Delta(elevator=0.0, aileron=0.0, rudder=0.0, throttle=0.0) 
 
 #Array to store state history
-# 9 state variables (north, east, down, u, v, w, p, q, r, phi, theta, psi)
+# 9 state variables (north, east, down, u, v, w, phi, theta, psi, p, q, r)
 state_history = np.zeros((num_steps, 12))  
 wind_history = np.zeros((num_steps, 6))
 
@@ -53,12 +53,12 @@ down = state_history[:, 2]
 u = state_history[:, 3]
 v = state_history[:, 4]
 w = state_history[:, 5]
-p = state_history[:, 6]
-q = state_history[:, 7]
-r = state_history[:, 8]
-phi = state_history[:, 9]
-theta = state_history[:, 10]
-psi = state_history[:, 11]
+phi = state_history[:, 6]
+theta = state_history[:, 7]
+psi = state_history[:, 8]
+p = state_history[:, 9]
+q = state_history[:, 10]
+r = state_history[:, 11]
 
 fig3d = plt.figure()
 ax = fig3d.add_subplot(111, projection='3d')

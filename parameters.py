@@ -3,7 +3,7 @@ import numpy as np
 #Initial Conditions
 pn_0 = 0 #position, north
 pe_0 = 0 #east
-pd_0 = 1 #down
+pd_0 = -1 #down
 u_0 = 10 #velocity, north
 v_0 = 0 #east
 w_0 = 0 #down

@@ -14,13 +14,13 @@ class Dynamics:
             [MAV.pd_0],   
             [MAV.u_0],     
             [MAV.v_0],     
-            [MAV.w_0],   
+            [MAV.w_0],  
+            [MAV.phi_0],   
+            [MAV.theta_0], 
+            [MAV.psi_0],    
             [MAV.p_0],      
             [MAV.q_0],      
             [MAV.r_0],      
-            [MAV.phi_0],   
-            [MAV.theta_0], 
-            [MAV.psi_0],   
         ])
         self.true_state = State()
         
@@ -55,7 +55,7 @@ class Dynamics:
 
 
     def _f(self, state, forces_moments):
-        pn, pe, pd, u, v, w, p, q, r, phi, theta, psi, = state.flatten()
+        pn, pe, pd, u, v, w, phi, theta, psi, p, q, r, = state.flatten()
         f_x, f_y, f_z, l, m, n = forces_moments.flatten()
     
         c_theta = np.cos(theta)
@@ -112,15 +112,15 @@ class Dynamics:
     def _update_true_state(self):
         self.true_state.pn = self._state.item(0)
         self.true_state.pe = self._state.item(1)
-        self.true_state.pd = -self._state.item(2)
+        self.true_state.pd = self._state.item(2)
         self.true_state.Va = 0
         self.true_state.alpha = 0
         self.true_state.beta = 0
-        self.true_state.phi = self._state.item(9)
-        self.true_state.theta = self._state.item(10)
-        self.true_state.psi = self._state.item(11)
-        self.true_state.p = self._state.item(6)
-        self.true_state.q = self._state.item(7)
-        self.true_state.r = self._state.item(8)
+        self.true_state.phi = self._state.item(6)
+        self.true_state.theta = self._state.item(7)
+        self.true_state.psi = self._state.item(8)
+        self.true_state.p = self._state.item(9)
+        self.true_state.q = self._state.item(10)
+        self.true_state.r = self._state.item(11)
 
 

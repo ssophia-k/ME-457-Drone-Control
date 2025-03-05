@@ -2,7 +2,7 @@ class State:
     def __init__(self):
         self.pn = 0.0
         self.pe = 0.0
-        self.pd = 10.0
+        self.pd = -10.0
         self.phi = 10.0  # roll angle (radians)
         self.theta = 2.0  # pitch angle (radians)
         self.psi = 2.0  # yaw angle (radians)

@@ -56,9 +56,9 @@ class MavDynamics(DynamicsForces):
         steady_state = wind[0:3]  # in NED
         gust = wind[3:6]  # in body frame
 
-        phi = self._state.item(9)
-        theta = self._state.item(10)
-        psi = self._state.item(11)
+        phi = self._state.item(6)
+        theta = self._state.item(7)
+        psi = self._state.item(8)
 
         # rotation matrix from body to NED
         R = np.array([
@@ -175,13 +175,13 @@ class MavDynamics(DynamicsForces):
     def _update_true_state(self):
         self.true_state.pn = self._state.item(0)
         self.true_state.pe = self._state.item(1)
-        self.true_state.pd = -self._state.item(2)
+        self.true_state.pd = self._state.item(2)
         self.true_state.Va = self._Va
         self.true_state.alpha = self._alpha
         self.true_state.beta = self._beta
-        self.true_state.phi = self._state.item(9)
-        self.true_state.theta = self._state.item(10)
-        self.true_state.psi = self._state.item(11)
-        self.true_state.p = self._state.item(6)
-        self.true_state.q = self._state.item(7)
-        self.true_state.r = self._state.item(8)
+        self.true_state.phi = self._state.item(6)
+        self.true_state.theta = self._state.item(7)
+        self.true_state.psi = self._state.item(8)
+        self.true_state.p = self._state.item(9)
+        self.true_state.q = self._state.item(10)
+        self.true_state.r = self._state.item(11)

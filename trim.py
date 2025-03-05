@@ -19,7 +19,7 @@ def compute_trim(mav, Va, gamma):
     psi_0 = 0.0
     state0 = np.array([[0],  # pn
                    [0],  # pe
-                   [10],  # h
+                   [-10],  # pd
                    [Va],  # u
                    [0.], # v
                    [0.], # w
