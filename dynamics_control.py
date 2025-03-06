@@ -11,10 +11,10 @@ mavsim_python
 import numpy as np
 from dynamics import Dynamics as DynamicsForces
 # load message types
-from state import State
-from delta import Delta
+from Message_types.state import State
+from Message_types.delta import Delta
 import parameters as MAV
-
+from Tools.rotations import quaternion_to_rotation, quaternion_to_euler
 
 class MavDynamics(DynamicsForces):
     def __init__(self, Ts):
@@ -97,8 +97,8 @@ class MavDynamics(DynamicsForces):
         :param delta: np.matrix(delta_a, delta_e, delta_r, delta_t)
         :return: Forces and Moments on the UAV np.matrix(Fx, Fy, Fz, Ml, Mn, Mm)
         """
-        phi, theta, psi = self._state[6:9]
-        p, q, r = self._state[9:12]
+        phi, theta, psi = quaternion_to_euler(self._state[6:10])
+        p, q, r = self._state[10:13]
 
         delta_a = delta.aileron
         delta_e = delta.elevator
@@ -106,22 +106,16 @@ class MavDynamics(DynamicsForces):
         delta_t = delta.throttle
 
         # compute gravitational forces
-        fg_ned = np.array([[0], [0], [-MAV.mass * MAV.gravity]])
-        R = np.array([
-            [np.cos(theta) * np.cos(psi), np.cos(theta) * np.sin(psi), -np.sin(theta)],
-            [np.sin(phi) * np.sin(theta) * np.cos(psi) - np.cos(phi) * np.sin(psi), 
-             np.sin(phi) * np.sin(theta) * np.sin(psi) + np.cos(phi) * np.cos(psi), 
-             np.sin(phi) * np.cos(theta)],
-            [np.cos(phi) * np.sin(theta) * np.cos(psi) + np.sin(phi) * np.sin(psi), 
-             np.cos(phi) * np.sin(theta) * np.sin(psi) - np.sin(phi) * np.cos(psi), 
-             np.cos(phi) * np.cos(theta)]
-        ])  # rotation matrix from body to NED
-        fg_body = R.T @ fg_ned
-        fg_x, fg_y, fg_z = fg_body.flatten()
+        fg_x = -MAV.mass * MAV.gravity * np.sin(theta)
+        fg_y = MAV.mass * MAV.gravity * np.cos(theta) * np.sin(phi)
+        fg_z = MAV.mass * MAV.gravity * np.cos(theta) * np.cos(phi)
 
         # compute Lift and Drag coefficients
-        C_L = MAV.C_L_0 + MAV.C_L_alpha * self._alpha
-        C_D = MAV.C_D_0 + MAV.C_D_alpha * self._alpha
+        sigma = (1 + np.exp(-MAV.M * (self._alpha - MAV.alpha0)) + np.exp(MAV.M * (self._alpha + MAV.alpha0))) / ((1 + np.exp(-MAV.M * (self._alpha - MAV.alpha0))) * (1 + np.exp(MAV.M * (self._alpha + MAV.alpha0))))
+        C_L = (1 - sigma) * (MAV.C_L_0 + MAV.C_L_alpha * self._alpha) + sigma * (2 * np.sign(self._alpha) * np.sin(self._alpha)**2 * np.cos(self._alpha))
+        C_D = MAV.C_D_p + (MAV.C_L_0 + MAV.C_L_alpha * self._alpha)**2 / (np.pi * MAV.e * MAV.AR)
+        #C_L = MAV.C_L_0 + MAV.C_L_alpha * self._alpha
+        #C_D = MAV.C_D_0 + MAV.C_D_alpha * self._alpha
         C_X = -C_D*np.cos(self._alpha) + C_L*np.sin(self._alpha)
         C_X_q = -MAV.C_D_q*np.cos(self._alpha) + MAV.C_L_q*np.sin(self._alpha)
         C_X_delta_e = -MAV.C_D_delta_e*np.cos(self._alpha) + MAV.C_L_delta_e*np.sin(self._alpha)
@@ -173,15 +167,23 @@ class MavDynamics(DynamicsForces):
         return thrust_prop, torque_prop
 
     def _update_true_state(self):
+        # rewrite this function because we now have more information
+        phi, theta, psi = quaternion_to_euler(self._state[6:10])
+        pdot = quaternion_to_rotation(self._state[6:10]) @ self._state[3:6]
         self.true_state.pn = self._state.item(0)
         self.true_state.pe = self._state.item(1)
-        self.true_state.pd = self._state.item(2)
+        self.true_state.altitude = -self._state.item(2)
         self.true_state.Va = self._Va
         self.true_state.alpha = self._alpha
         self.true_state.beta = self._beta
-        self.true_state.phi = self._state.item(6)
-        self.true_state.theta = self._state.item(7)
-        self.true_state.psi = self._state.item(8)
-        self.true_state.p = self._state.item(9)
-        self.true_state.q = self._state.item(10)
-        self.true_state.r = self._state.item(11)
+        self.true_state.phi = phi
+        self.true_state.theta = theta
+        self.true_state.psi = psi
+        self.true_state.Vg = np.linalg.norm(pdot)
+        self.true_state.gamma = np.arcsin(pdot.item(2) / self.true_state.Vg)
+        self.true_state.chi = np.arctan2(pdot.item(1), pdot.item(0))
+        self.true_state.p = self._state.item(10)
+        self.true_state.q = self._state.item(11)
+        self.true_state.r = self._state.item(12)
+        self.true_state.wn = self._wind.item(0)
+        self.true_state.we = self._wind.item(1)

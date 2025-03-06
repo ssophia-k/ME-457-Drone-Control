@@ -7,7 +7,7 @@ compute_trim
 import numpy as np
 from scipy.optimize import minimize
 from Tools.rotations import euler_to_quaternion
-from Message_types.msg_delta import MsgDelta
+from Message_types.delta import Delta
 import time
 
 def compute_trim(mav, Va, gamma):
@@ -59,7 +59,7 @@ def compute_trim(mav, Va, gamma):
                    options={'ftol': 1e-10, 'disp': True})
     # extract trim state and input and return
     trim_state = np.array([res.x[0:12]]).T
-    trim_input = MsgDelta(elevator=res.x.item(12),
+    trim_input = Delta(elevator=res.x.item(12),
                           aileron=res.x.item(13),
                           rudder=res.x.item(14),
                           throttle=res.x.item(15))
@@ -70,7 +70,7 @@ def compute_trim(mav, Va, gamma):
 
 def trim_objective_fun(x, mav, Va, gamma):
     state = x[0:12]
-    delta = MsgDelta(elevator=x.item(12),
+    delta = Delta(elevator=x.item(12),
                      aileron=x.item(13),
                      rudder=x.item(14),
                      throttle=x.item(15))

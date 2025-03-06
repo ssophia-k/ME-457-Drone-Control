@@ -7,14 +7,14 @@ import os, sys
 from pathlib import Path
 sys.path.insert(0,os.fspath(Path(__file__).parents[2]))
 import numpy as np
-import parameters as SIM
+#import parameters as SIM
 from dynamics_control import MavDynamics
-from Message_types.msg_delta import MsgDelta
+from Message_types.delta import Delta
 from wind import WindSimulation
 
-wind = WindSimulation(Ts = 0.01, gust_flag=False, steady_state = np.array([[0., 0., 0.]]).T)
-mav = MavDynamics(Ts=0.01)
-delta = MsgDelta()
+wind = WindSimulation(0.01)
+mav = MavDynamics(0.01)
+delta = Delta()
 delta.elevator = -0.2
 delta.aileron = 0.0
 delta.rudder = 0.005
@@ -42,12 +42,13 @@ print("down_dot: ", x_dot.item(2))
 print("   u_dot: ", x_dot.item(3))
 print("   v_dot: ", x_dot.item(4))
 print("   w_dot: ", x_dot.item(5))
-print("  phi_dot: ", x_dot.item(6))
-print("  theta_dot: ", x_dot.item(7))
-print("  psi_dot: ", x_dot.item(8))
-print("   p_dot: ", x_dot.item(9))
-print("   q_dot: ", x_dot.item(10))
-print("    r_dt: ", x_dot.item(11) , "\n\n\n")
+print("  e0_dot: ", x_dot.item(6))
+print("  e1_dot: ", x_dot.item(7))
+print("  e2_dot: ", x_dot.item(8))
+print("  e3_dot: ", x_dot.item(9))
+print("   p_dot: ", x_dot.item(10))
+print("   q_dot: ", x_dot.item(11))
+print("    r_dt: ", x_dot.item(12) , "\n\n\n")
 
 ##### Case 1 ######
 
@@ -62,9 +63,10 @@ mav._state = np.array([[ 6.19506532e+01],
  [ 2.73465947e+01],
  [ 6.19628233e-01],
  [ 1.42257772e+00],
- [ 0.515],
- [ 0.0090],
- [ 0.489],
+ [ 9.38688796e-01],
+ [ 2.47421558e-01],
+ [ 6.56821468e-02],
+ [ 2.30936730e-01],
  [ 4.98772167e-03],
  [ 1.68736005e-01],
  [ 1.71797313e-01]])
@@ -91,12 +93,13 @@ print("down_dot: ", x_dot.item(2))
 print("   u_dot: ", x_dot.item(3))
 print("   v_dot: ", x_dot.item(4))
 print("   w_dot: ", x_dot.item(5))
-print("  phi_dot: ", x_dot.item(6))
-print("  theta_dot: ", x_dot.item(7))
-print("  psi_dot: ", x_dot.item(8))
-print("   p_dot: ", x_dot.item(9))
-print("   q_dot: ", x_dot.item(10))
-print("    r_dt: ", x_dot.item(11) , "\n\n\n")
+print("  e0_dot: ", x_dot.item(6))
+print("  e1_dot: ", x_dot.item(7))
+print("  e2_dot: ", x_dot.item(8))
+print("  e3_dot: ", x_dot.item(9))
+print("   p_dot: ", x_dot.item(10))
+print("   q_dot: ", x_dot.item(11))
+print("    r_dt: ", x_dot.item(12) , "\n\n\n")
 
 
 current_wind = np.array([[ 0.        ],
@@ -135,12 +138,13 @@ print("down_dot: ", x_dot.item(2))
 print("   u_dot: ", x_dot.item(3))
 print("   v_dot: ", x_dot.item(4))
 print("   w_dot: ", x_dot.item(5))
-print("  phi_dot: ", x_dot.item(6))
-print("  theta_dot: ", x_dot.item(7))
-print("  psi_dot: ", x_dot.item(8))
-print("   p_dot: ", x_dot.item(9))
-print("   q_dot: ", x_dot.item(10))
-print("    r_dt: ", x_dot.item(11) , "\n\n\n")
+print("  e0_dot: ", x_dot.item(6))
+print("  e1_dot: ", x_dot.item(7))
+print("  e2_dot: ", x_dot.item(8))
+print("  e3_dot: ", x_dot.item(9))
+print("   p_dot: ", x_dot.item(10))
+print("   q_dot: ", x_dot.item(11))
+print("    r_dt: ", x_dot.item(12) , "\n\n\n")
 
 
 # These outputs are results using the default parameters from the imported parameter files

@@ -1,4 +1,5 @@
 import numpy as np
+from Tools.rotations import euler_to_quaternion
 
 #Initial Conditions
 pn_0 = 0 #position, north
@@ -14,6 +15,13 @@ p_0 = 0 #angular velocity in body frame, roll
 q_0 = 0 #pitch
 r_0 = 0 #yaw
 Va_0 = np.sqrt(u_0**2+v_0**2+w_0**2)
+
+#   Quaternion State
+e = euler_to_quaternion(phi_0, theta_0, psi_0)
+e_0 = e.item(0)
+e_1 = e.item(1)
+e_2 = e.item(2)
+e_3 = e.item(3)
 
 #Physical Parameters
 mass = 11. #kg
