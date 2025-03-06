@@ -1,17 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from Models.dynamics_control import MavDynamics
+from dynamics_control import MavDynamics
 from Message_types.delta import Delta
 from mpl_toolkits.mplot3d import Axes3D
-from Models.wind import WindSimulation
-from Models.trim import compute_trim
+from wind import WindSimulation
+from trim import compute_trim
 from Tools.rotations import quaternion_to_euler
 
 #We currently have some issues wrt scalar math overflow
 #If this remains an issue, we can decrease the dt value.
 #Fix coming soon.
 dt = 0.001
-num_steps = 5000
+num_steps = 50000
 t = np.linspace(0, dt*num_steps, num_steps)
 
 #MAV dynamics object
@@ -21,7 +21,7 @@ MAV = MavDynamics(Ts=dt)
 WIND_SIM = WindSimulation(Ts = dt, gust_flag=False, steady_state = np.array([[0., 0., 0.]]).T)
 
 #Trim Conditions
-Va = 10.0
+Va = 15.0
 gamma = 0.1
 trim_state, trim_input = compute_trim(MAV, Va, gamma)
 
@@ -68,6 +68,15 @@ phi, theta, psi = euler_angles[:, 0], euler_angles[:, 1], euler_angles[:, 2]
 fig3d = plt.figure()
 ax = fig3d.add_subplot(111, projection='3d')
 ax.plot(north, east, down, label='Aircraft Position')
+x_min, x_max = np.min(north), np.max(north)
+y_min, y_max = np.min(east), np.max(east)
+xy_max_range = max(x_max - x_min, y_max - y_min) / 2.0
+
+x_mid = (x_max + x_min) / 2.0
+y_mid = (y_max + y_min) / 2.0
+
+ax.set_xlim(x_mid - xy_max_range, x_mid + xy_max_range)
+ax.set_ylim(y_mid - xy_max_range, y_mid + xy_max_range)
 ax.set_xlabel('North (m)')
 ax.set_ylabel('East (m)')
 ax.set_zlabel('Down (m)')
