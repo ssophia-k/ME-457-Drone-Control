@@ -17,7 +17,7 @@ t = np.linspace(0, dt*num_steps, num_steps)
 MAV = MavDynamics(Ts=dt)
 
 #Wind Simulation Object
-WIND_SIM = WindSimulation(Ts = dt, gust_flag=True, steady_state = np.array([[0., 0., 0.]]).T)
+WIND_SIM = WindSimulation(Ts = dt, gust_flag=True, steady_state = np.array([[0., 0., 5.]]).T)
 
 #Control input
 delta = Delta(elevator=0.0, aileron=0.0, rudder=0.0, throttle=0.05) 
