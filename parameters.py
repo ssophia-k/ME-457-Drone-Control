@@ -1,21 +1,35 @@
 import numpy as np
+from Tools.rotations import euler_to_quaternion
 
-#Initial Conditions
-pn_0 = 0 #position, north
-pe_0 = 0 #east
-pd_0 = 0 #down
-u_0 = 0 #velocity, north
-v_0 = 0 #east
-w_0 = -1 #down
-phi_0 = 0 #orientation, roll
-theta_0 = 0 #pitch
-psi_0 = 0 #yaw
-p_0 = 0 #angular velocity in body frame, roll
-q_0 = 0 #pitch
-r_0 = 0 #yaw
+######################################################################################
+                #   Initial Conditions
+######################################################################################
+pn_0 = 0. #position, north
+pe_0 = 0. #east
+pd_0 = -100. #down
+u_0 = 25. #velocity, north
+v_0 = 0. #east
+w_0 = 0. #down
+phi_0 = 0. #orientation, roll
+theta_0 = 0. #pitch
+psi_0 = 0. #yaw
+p_0 = 0. #angular velocity in body frame, roll
+q_0 = 0. #pitch
+r_0 = 0. #yaw
 Va_0 = np.sqrt(u_0**2+v_0**2+w_0**2)
 
-#Physical Parameters
+#   Quaternion State
+e = euler_to_quaternion(phi_0, theta_0, psi_0)
+e_0 = e.item(0)
+e_1 = e.item(1)
+e_2 = e.item(2)
+e_3 = e.item(3)
+
+
+
+######################################################################################
+                #   Physical Parameters
+######################################################################################
 mass = 11. #kg
 J_x = 0.8244 #kg m^2
 J_y = 1.135
@@ -26,11 +40,15 @@ b = 2.8956
 c = 0.18994
 S_prop = 0.2027
 rho = 1.2682
-gravity = 9.81
 e = 0.9
 AR = (b**2) / S_wing
+gravity = 9.81
 
-#Drag/longitudinal coefficients
+
+
+######################################################################################
+                #   Longitudinal Coefficients
+######################################################################################
 C_L_0 = 0.23
 C_D_0 = 0.0424
 C_m_0 = 0.0135
@@ -48,7 +66,11 @@ alpha0 = 0.47
 epsilon = 0.16
 C_D_p = 0.043
 
-#Drag/lateral coefficients
+
+
+######################################################################################
+                #   Lateral Coefficients
+######################################################################################
 C_Y_0 = 0.0
 C_ell_0 = 0.0
 C_n_0 = 0.0
@@ -68,7 +90,10 @@ C_Y_delta_r = 0.19
 C_ell_delta_r = 0.0024
 C_n_delta_r = -0.069
 
-#   Propeller thrust / torque parameters (see addendum by McLain)
+
+
+######################################################################################
+                #   Propeller thrust / torque parameters (see addendum by McLain)
 ######################################################################################
 # Prop parameters
 D_prop = 20*(0.0254)     # prop diameter in m

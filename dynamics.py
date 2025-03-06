@@ -1,25 +1,38 @@
+"""
+mavDynamics 
+    - this file implements the dynamic equations of motion for MAV
+"""
+
 import numpy as np
 import parameters as MAV
-from state import State
+from Message_types.state import State
+from Tools.rotations import quaternion_to_rotation, quaternion_to_euler
 
 
 class Dynamics:
 
     def __init__(self, Ts):
         self._ts_simulation = Ts
+        # set initial states based on parameter file
+        # _state is the 13x1 internal state of the aircraft that is being propagated:
+        # _state = [pn, pe, pd, u, v, w, e0, e1, e2, e3, p, q, r]
+        # We will also need a variety of other elements that are functions of the _state and the wind.
+        # self.true_state is a 19x1 vector that is estimated and used by the autopilot to control the aircraft:
+        # true_state = [pn, pe, h, Va, alpha, beta, phi, theta, chi, p, q, r, Vg, wn, we, psi]
         self._state = np.array([
-            [MAV.pn_0],  
-            [MAV.pe_0],   
-            [MAV.pd_0],   
-            [MAV.u_0],     
-            [MAV.v_0],     
-            [MAV.w_0],   
-            [MAV.p_0],      
-            [MAV.q_0],      
-            [MAV.r_0],      
-            [MAV.phi_0],   
-            [MAV.theta_0], 
-            [MAV.psi_0],   
+            [MAV.pn_0],   #(0)
+            [MAV.pe_0],   #(1)
+            [MAV.pd_0],   #(2)
+            [MAV.u_0],    #(3)
+            [MAV.v_0],    #(4)  
+            [MAV.w_0],    #(5)
+            [MAV.e_0],  #(6)
+            [MAV.e_1],#(7)
+            [MAV.e_2],  #(8)
+            [MAV.e_3], #(9)
+            [MAV.p_0],    #(10)  
+            [MAV.q_0],    #(11) 
+            [MAV.r_0],    #(12)
         ])
         self.true_state = State()
         
@@ -43,49 +56,51 @@ class Dynamics:
     ##############################
     #Private Functions
     def _rk4_step(self, forces_moments):
-        dt = self._ts_simulation
-        k1 = self._f(self._state.flatten(), forces_moments)
-        k2 = self._f((self._state.flatten() + dt/2 * k1), forces_moments)
-        k3 = self._f((self._state.flatten() + dt/2 * k2), forces_moments)
-        k4 = self._f((self._state.flatten() + dt * k3), forces_moments)
+        time_step = self._ts_simulation
+        k1 = self._f(self._state, forces_moments)
+        k2 = self._f(self._state + time_step/2.*k1, forces_moments)
+        k3 = self._f(self._state + time_step/2.*k2, forces_moments)
+        k4 = self._f(self._state + time_step*k3, forces_moments)
+        self._state += time_step/6 * (k1 + 2*k2 + 2*k3 + k4)
 
-        self._state = self._state.flatten() + dt/6 * (k1 + 2*k2 + 2*k3 + k4)
-        self._state = self._state.reshape((12, 1))  # Ensure _state retains (12,1) shape
+        # normalize the quaternion
+        e0 = self._state.item(6)
+        e1 = self._state.item(7)
+        e2 = self._state.item(8)
+        e3 = self._state.item(9)
+        normE = (e0**2+e1**2+e2**2+e3**2)**0.5
+        self._state[6][0] = self._state.item(6)/normE
+        self._state[7][0] = self._state.item(7)/normE
+        self._state[8][0] = self._state.item(8)/normE
+        self._state[9][0] = self._state.item(9)/normE
 
 
     def _f(self, state, forces_moments):
-        pn, pe, pd, u, v, w, p, q, r, phi, theta, psi, = state.flatten()
+        """
+        for the dynamics xdot = f(x, u), returns f(x, u)
+        """
+        pn, pe, pd, u, v, w, e0, e1, e2, e3, p, q, r = state[0:13]
         f_x, f_y, f_z, l, m, n = forces_moments.flatten()
-    
-        c_theta = np.cos(theta)
-        s_theta = np.sin(theta)
-        c_phi = np.cos(phi)
-        s_phi = np.sin(phi)
-        c_psi = np.cos(psi)
-        s_psi = np.sin(psi)
 
-        pn_dot = (c_theta*c_psi)*u + (s_phi*s_theta*c_psi - c_phi*s_psi)*v + (c_phi*s_theta*c_psi + s_phi*s_psi)*w
-        pe_dot = (c_theta*s_psi)*u + (s_phi*s_theta*s_psi + c_phi*c_psi)*v + (c_phi*s_theta*s_psi - s_phi*c_psi)*w
-        pd_dot = -(s_theta)*u + (s_phi*c_theta)*v + (c_phi*c_theta)*w
 
+        # Position Kinematics
+        pos_dot = quaternion_to_rotation(np.array([e0, e1, e2, e3])) @ np.array([u, v, w])
+        pn_dot = pos_dot[0]
+        pe_dot = pos_dot[1]
+        pd_dot = pos_dot[2]
+
+        # Position Dynamics
         u_dot = r*v - q*w + f_x/MAV.mass
         v_dot = p*w - r*u + f_y/MAV.mass
         w_dot = q*u - p*v + f_z/MAV.mass
 
-        angular_velocity_body = np.array([p, q, r])
+        #Rotational kinematics
+        e0_dot = 0.5 * (-p*e1 - q*e2 - r*e3)
+        e1_dot = 0.5 * ( p*e0 + r*e2 - q*e3)
+        e2_dot = 0.5 * ( q*e0 - r*e1 + p*e3)
+        e3_dot = 0.5 * ( r*e0 + q*e1 - p*e2)
 
-        angular_matrix = np.array([
-        [1, s_phi*np.tan(theta), c_phi*np.tan(theta)],
-        [0, c_phi, -s_phi],
-        [0, s_phi/c_theta, c_phi/c_theta ]
-        ])
-
-        angular_acceleration_euler = angular_matrix @ angular_velocity_body
-
-        phi_dot = angular_acceleration_euler[0]
-        theta_dot = angular_acceleration_euler[1]
-        psi_dot = angular_acceleration_euler[2]
-
+        #Rotational dynamics
         gamma = (MAV.J_x*MAV.J_z) - (MAV.J_xz**2)
         gamma_1 = (MAV.J_xz*(MAV.J_x - MAV.J_y + MAV.J_z))/gamma
         gamma_2 = (MAV.J_z*(MAV.J_z - MAV.J_y) + MAV.J_xz**2)/gamma
@@ -106,20 +121,27 @@ class Dynamics:
         q_dot = angular_acceleration_body[1]
         r_dot = angular_acceleration_body[2]
 
-        return np.array([pn_dot, pe_dot, pd_dot, u_dot, v_dot, w_dot, p_dot, q_dot, r_dot, phi_dot, theta_dot, psi_dot])
+        #Return x-dot
+        return np.array([pn_dot, pe_dot, pd_dot, u_dot, v_dot, w_dot, e0_dot, e1_dot, e2_dot, e3_dot, p_dot, q_dot, r_dot])
 
     def _update_true_state(self):
+        # update the class structure for the true state:
+        #   [pn, pe, h, Va, alpha, beta, phi, theta, chi, p, q, r, Vg, wn, we, psi, gyro_bx, gyro_by, gyro_bz]
+        phi, theta, psi = quaternion_to_euler(self._state[6:10])
         self.true_state.pn = self._state.item(0)
         self.true_state.pe = self._state.item(1)
-        self.true_state.pd = -self._state.item(2)
+        self.true_state.altitude = -self._state.item(2)
         self.true_state.Va = 0
         self.true_state.alpha = 0
         self.true_state.beta = 0
-        self.true_state.phi = self._state.item(9)
-        self.true_state.theta = self._state.item(10)
-        self.true_state.psi = self._state.item(11)
-        self.true_state.p = self._state.item(6)
-        self.true_state.q = self._state.item(7)
-        self.true_state.r = self._state.item(8)
-
-
+        self.true_state.phi = phi
+        self.true_state.theta = theta
+        self.true_state.psi = psi
+        self.true_state.Vg = 0
+        self.true_state.gamma = 0
+        self.true_state.chi = 0
+        self.true_state.p = self._state.item(10)
+        self.true_state.q = self._state.item(11)
+        self.true_state.r = self._state.item(12)
+        self.true_state.wn = 0
+        self.true_state.we = 0

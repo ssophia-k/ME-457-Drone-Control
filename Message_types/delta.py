@@ -8,6 +8,7 @@ part of mavsim
         2/27/2020 - RWB
         4/6/2022 - RWB
 """
+#Checked with source
 import numpy as np
 
 
