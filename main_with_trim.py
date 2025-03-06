@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from dynamics_control import MavDynamics
+from Models.dynamics_control import MavDynamics
 from Message_types.delta import Delta
 from mpl_toolkits.mplot3d import Axes3D
-from wind import WindSimulation
-from trim import compute_trim
+from Models.wind import WindSimulation
+from Models.trim import compute_trim
 from Tools.rotations import quaternion_to_euler
 
 #We currently have some issues wrt scalar math overflow

@@ -5,12 +5,12 @@
 import os, sys
 # insert parent directory at beginning of python search path
 from pathlib import Path
-sys.path.insert(0,os.fspath(Path(__file__).parents[2]))
+sys.path.insert(0,os.fspath(Path(__file__).parents[1]))
 import numpy as np
 #import parameters as SIM
-from dynamics_control import MavDynamics
+from Models.dynamics_control import MavDynamics
 from Message_types.delta import Delta
-from wind import WindSimulation
+from Models.wind import WindSimulation
 
 wind = WindSimulation(0.01)
 mav = MavDynamics(0.01)

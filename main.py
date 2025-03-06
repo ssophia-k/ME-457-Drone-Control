@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from dynamics_control import MavDynamics
+from Models.dynamics_control import MavDynamics
 from Message_types.delta import Delta
 from mpl_toolkits.mplot3d import Axes3D
 from Tools.rotations import quaternion_to_euler
-from wind import WindSimulation
+from Models.wind import WindSimulation
 
 #We currently have some issues wrt scalar math overflow
 #If this remains an issue, we can decrease the dt value.
@@ -17,7 +17,7 @@ t = np.linspace(0, dt*num_steps, num_steps)
 MAV = MavDynamics(Ts=dt)
 
 #Wind Simulation Object
-WIND_SIM = WindSimulation(Ts = dt, gust_flag=True, steady_state = np.array([[5., 0., 0.]]).T)
+WIND_SIM = WindSimulation(Ts = dt, gust_flag=True, steady_state = np.array([[0., 0., 0.]]).T)
 
 #Control input
 delta = Delta(elevator=0.0, aileron=0.0, rudder=0.0, throttle=0.05) 
@@ -26,13 +26,14 @@ delta = Delta(elevator=0.0, aileron=0.0, rudder=0.0, throttle=0.05)
 wind = np.zeros((6, 1))
 
 #Array to store state history
-# 9 state variables (north, east, down, u, v, w, p, q, r, phi, theta, psi)
+# 13 state variables (north, east, down, u, v, w, e0, e1, e2, e3, p, q, r)
 state_history = np.zeros((num_steps, 13))  
 wind_history = np.zeros((num_steps, 6))
 
 #Integrate it up!
 for i in range(num_steps):
-    MAV.update(delta, WIND_SIM.update())
+    wind = WIND_SIM.update()
+    MAV.update(delta, wind)
 
     # Store all state variables in one row
     state_history[i, :] = MAV._state[:13, 0] 
@@ -96,7 +97,7 @@ axs[3].legend()
 plt.tight_layout()
 plt.show()
 
-"""
+
 #Plot wind
 fig, axs = plt.subplots(2, 1, figsize=(15, 8))
 
@@ -117,4 +118,3 @@ axs[1].legend()
 
 plt.tight_layout()
 plt.show()
-"""

@@ -9,7 +9,7 @@ mavsim_python
         2/24/2020 - RWB
 """
 import numpy as np
-from dynamics import Dynamics as DynamicsForces
+from Models.dynamics import Dynamics as DynamicsForces
 # load message types
 from Message_types.state import State
 from Message_types.delta import Delta

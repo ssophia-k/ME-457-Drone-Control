@@ -1,3 +1,6 @@
+#NOT FINISHED
+#Class exercise abt function minimization, NOT important
+
 from scipy.optimize import minimize
 import numpy as np
 
