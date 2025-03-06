@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 from dynamics_control import MavDynamics
 from Message_types.delta import Delta
 from mpl_toolkits.mplot3d import Axes3D
-from Tools.rotations import quaternion_to_euler
 from wind import WindSimulation
+from trim import compute_trim
+from Tools.rotations import quaternion_to_euler
 
 #We currently have some issues wrt scalar math overflow
 #If this remains an issue, we can decrease the dt value.
@@ -17,26 +18,35 @@ t = np.linspace(0, dt*num_steps, num_steps)
 MAV = MavDynamics(Ts=dt)
 
 #Wind Simulation Object
-WIND_SIM = WindSimulation(Ts = dt, gust_flag=True, steady_state = np.array([[5., 0., 0.]]).T)
+WIND_SIM = WindSimulation(Ts = dt, gust_flag=False, steady_state = np.array([[0., 0., 0.]]).T)
+
+#Trim Conditions
+Va = 10.0
+gamma = 0.1
+trim_state, trim_input = compute_trim(MAV, Va, gamma)
+
+#Set initial conditions
+MAV._state = trim_state 
+delta_array = np.array([trim_input.elevator, trim_input.aileron, trim_input.rudder, trim_input.throttle])
+delta = Delta()
+delta.from_array(delta_array) 
 
 #Control input
-delta = Delta(elevator=0.0, aileron=0.0, rudder=0.0, throttle=0.05) 
-
-#Wind vector (ss and gust), zero for now
-wind = np.zeros((6, 1))
+# delta = Delta(elevator=0.0, aileron=0.0, rudder=0.0, throttle=0.0) 
 
 #Array to store state history
-# 9 state variables (north, east, down, u, v, w, p, q, r, phi, theta, psi)
+# 9 state variables (north, east, down, u, v, w, phi, theta, psi, p, q, r)
 state_history = np.zeros((num_steps, 13))  
 wind_history = np.zeros((num_steps, 6))
 
 #Integrate it up!
 for i in range(num_steps):
-    MAV.update(delta, WIND_SIM.update())
+    wind = WIND_SIM.update()
+    MAV.update(delta, wind)
 
     # Store all state variables in one row
-    state_history[i, :] = MAV._state[:13, 0] 
-    wind_history[i, :] = wind[:6, 0]   
+    state_history[i, :] = MAV._state[:13, 0]  
+    wind_history[i, :] = wind[:6, 0]  
 
 north = state_history[:, 0]
 east = state_history[:, 1]
@@ -64,8 +74,6 @@ ax.set_zlabel('Down (m)')
 ax.set_title('3D Flight Path')
 ax.legend()
 plt.show()
-
-print(phi)
 
 fig, axs = plt.subplots(4, 1, figsize=(15, 8))
 
@@ -96,7 +104,6 @@ axs[3].legend()
 plt.tight_layout()
 plt.show()
 
-"""
 #Plot wind
 fig, axs = plt.subplots(2, 1, figsize=(15, 8))
 
@@ -117,4 +124,3 @@ axs[1].legend()
 
 plt.tight_layout()
 plt.show()
-"""

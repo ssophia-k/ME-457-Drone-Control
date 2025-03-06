@@ -56,20 +56,19 @@ class Dynamics:
     ##############################
     #Private Functions
     def _rk4_step(self, forces_moments):
-        dt = self._ts_simulation
-        k1 = self._f(self._state[0:13], forces_moments)
-        k2 = self._f((self._state[0:13] + dt/2.*k1), forces_moments)
-        k3 = self._f((self._state[0:13] + dt/2.*k2), forces_moments)
-        k4 = self._f((self._state[0:13] + dt * k3), forces_moments)
+        time_step = self._ts_simulation
+        k1 = self._f(self._state, forces_moments)
+        k2 = self._f(self._state + time_step/2.*k1, forces_moments)
+        k3 = self._f(self._state + time_step/2.*k2, forces_moments)
+        k4 = self._f(self._state + time_step*k3, forces_moments)
+        self._state += time_step/6 * (k1 + 2*k2 + 2*k3 + k4)
 
-        self._state[0:13] += dt/6 * (k1 + 2*k2 + 2*k3 + k4)
-        
         # normalize the quaternion
         e0 = self._state.item(6)
         e1 = self._state.item(7)
         e2 = self._state.item(8)
         e3 = self._state.item(9)
-        normE = np.sqrt(e0**2+e1**2+e2**2+e3**2)
+        normE = (e0**2+e1**2+e2**2+e3**2)**0.5
         self._state[6][0] = self._state.item(6)/normE
         self._state[7][0] = self._state.item(7)/normE
         self._state[8][0] = self._state.item(8)/normE
@@ -85,9 +84,10 @@ class Dynamics:
 
 
         # Position Kinematics
-        pn_dot = (e1**2 + e0**2 - e2**2 - e3**2)*u + 2*(e1*e2 - e3*e0)*v + 2*(e1*e3 + e2*e0)*w
-        pe_dot = 2*(e1*e2 + e3*e0)*u + (e2**2 + e0**2 - e1**2 - e3**2)*v + 2*(e2*e3 - e1*e0)*w
-        pd_dot = 2*(e1*e3 - e2*e0)*u + 2*(e2*e3 + e1*e0)*v + (e3**2 + e0**2 - e1**2 - e2**2)*w
+        pos_dot = quaternion_to_rotation(np.array([e0, e1, e2, e3])) @ np.array([u, v, w])
+        pn_dot = pos_dot[0]
+        pe_dot = pos_dot[1]
+        pd_dot = pos_dot[2]
 
         # Position Dynamics
         u_dot = r*v - q*w + f_x/MAV.mass
@@ -95,10 +95,10 @@ class Dynamics:
         w_dot = q*u - p*v + f_z/MAV.mass
 
         #Rotational kinematics
-        e0_dot = 0.5*( - e1*p - e2*q - e3*r)
-        e1_dot = 0.5*( e0*p + e2*r - e3*q)
-        e2_dot = 0.5*(e0*q - e1*r + e3*p)
-        e3_dot = 0.5*(e0*r + e1*q - e2*p)
+        e0_dot = 0.5 * (-p*e1 - q*e2 - r*e3)
+        e1_dot = 0.5 * ( p*e0 + r*e2 - q*e3)
+        e2_dot = 0.5 * ( q*e0 - r*e1 + p*e3)
+        e3_dot = 0.5 * ( r*e0 + q*e1 - p*e2)
 
         #Rotational dynamics
         gamma = (MAV.J_x*MAV.J_z) - (MAV.J_xz**2)
