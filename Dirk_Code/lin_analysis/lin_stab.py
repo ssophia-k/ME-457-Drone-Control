@@ -3,7 +3,7 @@ import numpy as np
 from numpy import linalg as LA
 from control.matlab import *  # MATLAB-like control toolbox functionality
 
-from mavsim_python_chap5_model_coef import *
+from Dirk_Code.mavsim_python_chap5_model_coef import *
 
 ##################################################################################
 # longitudinal states: u, w, q, theta, h

@@ -13,7 +13,7 @@ from Models.dynamics import Dynamics as DynamicsForces
 # load message types
 from Message_types.state import State
 from Message_types.delta import Delta
-import parameters as MAV
+import Parameters.parameters as MAV
 from Tools.rotations import quaternion_to_rotation, quaternion_to_euler
 
 class MavDynamics(DynamicsForces):

@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import parameters as P
+import Parameters.parameters as P
 from integrators import get_integrator
 from pid import PIDControl
 

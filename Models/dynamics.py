@@ -4,7 +4,7 @@ mavDynamics
 """
 
 import numpy as np
-import parameters as MAV
+import Parameters.parameters as MAV
 from Message_types.state import State
 from Tools.rotations import quaternion_to_rotation, quaternion_to_euler
 
