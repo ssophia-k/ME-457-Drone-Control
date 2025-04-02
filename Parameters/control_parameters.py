@@ -4,7 +4,7 @@ from pathlib import Path
 sys.path.insert(0,os.fspath(Path(__file__).parents[1]))
 
 import numpy as np
-import Dirk_Code.mavsim_python_chap5_model_coef as TF
+import Models.mavsim_python_chap5_model_coef as TF
 import Parameters.parameters as MAV
 
 

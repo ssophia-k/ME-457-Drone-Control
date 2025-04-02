@@ -90,6 +90,7 @@ plt.figure()
 # airspeed
 plt.subplot(4, 1, 1)
 plt.plot(time_history, Va_history, label='Airspeed (Va)')
+plt.plot(time_history, Va_command.square(time_history), label='Va command')
 plt.ylabel('Va (m/s)')
 plt.grid()
 plt.legend()
