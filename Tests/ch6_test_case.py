@@ -18,22 +18,19 @@ from Tools.signals import Signals
 from Models.dynamics_control import MavDynamics
 from Models.wind import WindSimulation
 from Controllers.autopilot_lqr import Autopilot
+from Message_types.autopilot import MsgAutopilot
 import matplotlib.pyplot as plt
-from Models.trim import compute_trim
+import Models.model_coef as M
 
 # initialize elements of the architecture
 wind = WindSimulation(SIM.ts_simulation)
 mav = MavDynamics(SIM.ts_simulation)
 
-Va_trim = 25.0
-gamma_trim = 0.0
-trim_state, trim_delta = compute_trim(mav, Va_trim, gamma_trim)
-mav._state = trim_state
-
-autopilot = Autopilot(SIM.ts_simulation, trim_delta)
+# Set initial state to trim state
+mav._state = M.x_trim
+autopilot = Autopilot(SIM.ts_simulation)
 
 # autopilot commands
-from Message_types.autopilot import MsgAutopilot
 commands = MsgAutopilot()
 Va_command = Signals(dc_offset=25.0,
                      amplitude=3.0,
@@ -63,14 +60,12 @@ Va_command_history = []
 altitude_command_history = []
 course_command_history = []
 
-
 # initialize the simulation time
 sim_time = SIM.start_time
 end_time = 200
 
 # main simulation loop
 while sim_time < end_time:
-
     # autopilot commands
     current_Va_command = Va_command.square(sim_time)
     current_course_command = course_command.square(sim_time)
@@ -103,13 +98,12 @@ while sim_time < end_time:
     altitude_command_history.append(-current_altitude_command)  # Negative to match plotting convention
     course_command_history.append(current_course_command)
 
-    # unwrap the angles
-    course_history_unwrapped = np.unwrap(course_history)
-    course_command_history_unwrapped = np.unwrap(course_command_history)
-
     # increment time
     sim_time += SIM.ts_simulation
 
+# Unwrap angles for plotting
+course_history_unwrapped = np.unwrap(course_history)
+course_command_history_unwrapped = np.unwrap(course_command_history)
 
 # plot the data
 plt.figure(figsize=(12, 10))
@@ -132,7 +126,7 @@ plt.legend()
 
 # course
 plt.subplot(4, 1, 3)
-plt.plot(time_history, course_history_unwrapped, label='Course angle (rad))')
+plt.plot(time_history, course_history_unwrapped, label='Course angle (rad)')
 plt.plot(time_history, course_command_history_unwrapped, 'r--', label='Command')
 plt.ylabel('Course (rad)')
 plt.grid()
