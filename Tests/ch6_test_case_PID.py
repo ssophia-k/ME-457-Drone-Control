@@ -18,16 +18,20 @@ from Tools.signals import Signals
 from Models.dynamics_control import MavDynamics
 from Models.wind import WindSimulation
 from Controllers.autopilot import Autopilot
+from Message_types.autopilot import MsgAutopilot
 import matplotlib.pyplot as plt
+import Models.model_coef as M
 
 # initialize elements of the architecture
 wind = WindSimulation(SIM.ts_simulation)
 mav = MavDynamics(SIM.ts_simulation)
+
+# Set initial state to trim state
+mav._state = M.x_trim
 autopilot = Autopilot(SIM.ts_simulation)
 
 # autopilot commands
-from Message_types.autopilot import Autopilot
-commands = Autopilot()
+commands = MsgAutopilot()
 Va_command = Signals(dc_offset=25.0,
                      amplitude=3.0,
                      start_time=2.0,
@@ -51,17 +55,25 @@ delta_a_history = []
 delta_r_history = []
 delta_t_history = []
 
+# initialize storage for command signals
+Va_command_history = []
+altitude_command_history = []
+course_command_history = []
+
 # initialize the simulation time
 sim_time = SIM.start_time
-end_time = 300
+end_time = 200
 
 # main simulation loop
 while sim_time < end_time:
-
     # autopilot commands
-    commands.airspeed_command = Va_command.square(sim_time)
-    commands.course_command = course_command.square(sim_time)
-    commands.altitude_command = altitude_command.square(sim_time)
+    current_Va_command = Va_command.square(sim_time)
+    current_course_command = course_command.square(sim_time)
+    current_altitude_command = altitude_command.square(sim_time)
+    
+    commands.airspeed_command = current_Va_command
+    commands.course_command = current_course_command
+    commands.altitude_command = current_altitude_command
 
     # autopilot
     estimated_state = mav.true_state
@@ -75,22 +87,31 @@ while sim_time < end_time:
     time_history.append(sim_time)
     Va_history.append(mav.true_state.Va)
     altitude_history.append(-mav.true_state.altitude)
-    course_history.append(np.degrees(mav.true_state.chi))
+    course_history.append(mav.true_state.chi)
     delta_e_history.append(delta.elevator)
     delta_a_history.append(delta.aileron)
     delta_r_history.append(delta.rudder)
     delta_t_history.append(delta.throttle)
 
+    # store command signals
+    Va_command_history.append(current_Va_command)
+    altitude_command_history.append(-current_altitude_command)  # Negative to match plotting convention
+    course_command_history.append(current_course_command)
+
     # increment time
     sim_time += SIM.ts_simulation
 
+# Unwrap angles for plotting
+course_history_unwrapped = np.unwrap(course_history)
+course_command_history_unwrapped = np.unwrap(course_command_history)
+
 # plot the data
-plt.figure()
+plt.figure(figsize=(12, 10))
 
 # airspeed
 plt.subplot(4, 1, 1)
 plt.plot(time_history, Va_history, label='Airspeed (Va)')
-plt.plot(time_history, Va_command.square(time_history), label='Va command')
+plt.plot(time_history, Va_command_history, 'r--', label='Command')
 plt.ylabel('Va (m/s)')
 plt.grid()
 plt.legend()
@@ -98,14 +119,16 @@ plt.legend()
 # altitude
 plt.subplot(4, 1, 2)
 plt.plot(time_history, altitude_history, label='Altitude')
+plt.plot(time_history, altitude_command_history, 'r--', label='Command')
 plt.ylabel('Altitude (m)')
 plt.grid()
 plt.legend()
 
 # course
 plt.subplot(4, 1, 3)
-plt.plot(time_history, course_history, label='Course angle (deg)')
-plt.ylabel('Course (deg)')
+plt.plot(time_history, course_history_unwrapped, label='Course angle (rad)')
+plt.plot(time_history, course_command_history_unwrapped, 'r--', label='Command')
+plt.ylabel('Course (rad)')
 plt.grid()
 plt.legend()
 

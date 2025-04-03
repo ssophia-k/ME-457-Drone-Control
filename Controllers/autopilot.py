@@ -15,6 +15,7 @@ from Tools.wrap import wrap
 from Controllers.pi_control import PIControl
 from Controllers.pd_control_with_rate import PDControlWithRate
 from Controllers.tf_control import TFControl
+from Controllers.pid_control import PIDControl
 from Message_types.state import State
 from Message_types.delta import Delta
 
