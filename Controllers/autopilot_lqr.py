@@ -4,11 +4,6 @@ autopilot block for mavsim_python
     - Last Update:
         2/10/22 - RWB
 """
-import os, sys
-# insert parent directory at beginning of python search path
-from pathlib import Path
-sys.path.insert(0,os.fspath(Path(__file__).parents[1]))
-
 import numpy as np
 from numpy import array, sin, cos, radians, concatenate, zeros, diag
 from scipy.linalg import solve_continuous_are, inv

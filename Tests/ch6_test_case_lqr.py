@@ -17,7 +17,7 @@ import Parameters.simulation_parameters as SIM
 from Tools.signals import Signals
 from Models.dynamics_control import MavDynamics
 from Models.wind import WindSimulation
-from Controllers.autopilot import Autopilot
+from Controllers.autopilot_lqr import Autopilot
 from Message_types.autopilot import MsgAutopilot
 import matplotlib.pyplot as plt
 import Models.model_coef as M
