@@ -48,8 +48,8 @@ class Autopilot:
                     concatenate((HLat, zeros((1,1))), axis=1)),
                     axis=0)
         BBlat = concatenate((M.B_lat, zeros((1,2))), axis=0)
-        Qlat = diag([0.43055586330689405, 0.8161005484899314, 11.616778199952448, 21.86943030926892, 0.20995071471888255, 13.29816829974618]) # v, p, r, phi, chi, intChi
-        Rlat = diag([0.003415326993571652, 4.936618432275214]) # a, r
+        Qlat = diag([0.5, 0.5, 10, 3, 1, 2]) # v, p, r, phi, chi, intChi
+        Rlat = diag([0.6, 0.7]) # a, r
         Plat = solve_continuous_are(AAlat, BBlat, Qlat, Rlat)
         self.Klat = inv(Rlat) @ BBlat.T @ Plat
         
@@ -59,8 +59,8 @@ class Autopilot:
                     concatenate((HLon, zeros((2,2))), axis=1)),
                     axis=0)
         BBlon = concatenate((M.B_lon, zeros((2, 2))), axis=0)
-        Qlon = diag([8.857719780145729, 4.35253257393339, 2.1150472679802315, 12.315787768195039, 1.2344041283431726, 63.27903318413501, 4.828766697227217]) # u, w, q, theta, h, intH, intVa
-        Rlon = diag([4.568284033194546, 1.5963397595437596])  # e, t
+        Qlon = diag([1, 0.15, 0.25, 15.0, 25, 1.5, 8]) # u, w, q, theta, h, intH, intVa
+        Rlon = diag([2.7, 0.25])  # e, t
         Plon = solve_continuous_are(AAlon, BBlon, Qlon, Rlon)
         self.Klon = inv(Rlon) @ BBlon.T @ Plon
         
@@ -86,13 +86,13 @@ class Autopilot:
                     [state.phi],
                     [errorCourse],
                     [self.integratorCourse]])
-        tmp = -self.Klat @ xLat
+        ulat = -self.Klat @ xLat
         
         # Apply LQR computed deviations to trim values
         delta_a_trim = self.trim_delta.aileron
         delta_r_trim = self.trim_delta.rudder
-        delta_a = saturate(tmp.item(0) + delta_a_trim, -radians(30), radians(30))
-        delta_r = saturate(tmp.item(1) + delta_r_trim, -radians(30), radians(30))
+        delta_a = saturate(ulat.item(0) + delta_a_trim, -radians(30), radians(30))
+        delta_r = saturate(ulat.item(1) + delta_r_trim, -radians(30), radians(30))
 
         # longitudinal autopilot
         altitude_c = saturate(cmd.altitude_command,
@@ -114,13 +114,13 @@ class Autopilot:
                     [errorAltitude],
                     [self.integratorAltitude],
                     [self.integratorAirspeed]])
-        tmp = -self.Klon @ xLon
+        ulon = -self.Klon @ xLon
         
         # Apply LQR computed deviations to trim values
         delta_e_trim = self.trim_delta.elevator
         delta_t_trim = self.trim_delta.throttle
-        delta_e = saturate(tmp.item(0) + delta_e_trim, -radians(30), radians(30))
-        delta_t = saturate(tmp.item(1) + delta_t_trim, 0.0, 1.0)
+        delta_e = saturate(ulon.item(0) + delta_e_trim, -radians(30), radians(30))
+        delta_t = saturate(ulon.item(1) + delta_t_trim, 0.0, 1.0)
 
         # construct control outputs and commanded states
         delta = Delta(elevator=delta_e,
