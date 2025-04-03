@@ -11,15 +11,15 @@ class WindSimulation:
     def __init__(self, Ts, gust_flag = False, steady_state = np.array([[0., 0., 0.]]).T):
         # steady state wind defined in the inertial frame, gust defined in the body frame
         self._steady_state = steady_state
-        V_a0 = 15  # m/s
+        V_a0 = 25  # m/s
 
         if gust_flag:
             # Dryden gust model parameters
             # Low Altitude (50m), Light Turbulence
-            #L_u = L_v = 200
-            #L_w = 50
-            #sigma_u=sigma_v = 1.06
-            #sigma_w = 0.7
+            L_u = L_v = 200
+            L_w = 50
+            sigma_u=sigma_v = 1.06
+            sigma_w = 0.7
 
             # Low Altitude (50m), Moderate Turbulence
             #L_u = L_v = 200

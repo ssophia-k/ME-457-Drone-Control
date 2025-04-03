@@ -17,14 +17,14 @@ def compute_trim(mav, Va, gamma):
     e0 = euler_to_quaternion(0, gamma, 0)
     state0 = np.array([[0],  # pn
                    [0],  # pe
-                   [0],  # pd
+                   [-120],  # pd
                    [Va],  # u
                    [0.], # v
                    [0.], # w
-                   [1],  # e0
-                   [0],  # e1
-                   [0],  # e2
-                   [0],  # e3
+                   [e0.item(0)],  # e0
+                   [e0.item(1)],  # e1
+                   [e0.item(2)],  # e2
+                   [e0.item(3)],  # e3
                    [0.], # p
                    [0.], # q
                    [0.]  # r
@@ -81,7 +81,7 @@ def trim_objective_fun(x, mav, Va, gamma):
     aileron=x.item(14),
     rudder=x.item(15),
     throttle=x.item(16))
-    desired_trim_state_dot = np.array([[0., 0., -Va*np.sin(gamma), 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]]).T
+    desired_trim_state_dot = np.array([[0., 0., -Va*np.sin(gamma), 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.]]).T
 
     mav._state = state
     mav._update_velocity_data()
