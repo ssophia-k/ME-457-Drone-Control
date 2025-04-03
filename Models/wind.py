@@ -8,18 +8,18 @@ import numpy as np
 
 
 class WindSimulation:
-    def __init__(self, Ts, gust_flag = True, steady_state = np.array([[0., 0., 0.]]).T):
+    def __init__(self, Ts, gust_flag = False, steady_state = np.array([[0., 0., 0.]]).T):
         # steady state wind defined in the inertial frame, gust defined in the body frame
         self._steady_state = steady_state
-        V_a0 = 15  # m/s
+        V_a0 = 25  # m/s
 
         if gust_flag:
             # Dryden gust model parameters
             # Low Altitude (50m), Light Turbulence
-            #L_u = L_v = 200
-            #L_w = 50
-            #sigma_u=sigma_v = 1.06
-            #sigma_w = 0.7
+            L_u = L_v = 200
+            L_w = 50
+            sigma_u=sigma_v = 1.06
+            sigma_w = 0.7
 
             # Low Altitude (50m), Moderate Turbulence
             #L_u = L_v = 200
@@ -34,10 +34,10 @@ class WindSimulation:
             #sigma_w = 1.5
 
             # Med Altitude (600m), Moderate Turbulence
-            L_u = L_v = 533
-            L_w = 533
-            sigma_u=sigma_v = 3.0
-            sigma_w = 3.0
+            # L_u = L_v = 533
+            # L_w = 533
+            # sigma_u=sigma_v = 3.0
+            # sigma_w = 3.0
 
             # Dryden transfer functions
             self.u_w = TransferFunction(num=np.array([[sigma_u * np.sqrt(2.0 * V_a0 / (np.pi * L_u))]]), den=np.array([[1,V_a0/L_u]]),Ts=Ts)
