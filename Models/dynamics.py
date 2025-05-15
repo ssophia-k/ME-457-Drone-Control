@@ -33,6 +33,8 @@ class Dynamics:
             [MAV.p_0],    #(10)  
             [MAV.q_0],    #(11) 
             [MAV.r_0],    #(12)
+            [0],
+            [0]
         ])
         self.true_state = State()
         
@@ -145,3 +147,8 @@ class Dynamics:
         self.true_state.r = self._state.item(12)
         self.true_state.wn = 0
         self.true_state.we = 0
+        self.true_state.bx = 0
+        self.true_state.by = 0
+        self.true_state.bz = 0
+        self.true_state.camera_az = 0
+        self.true_state.camera_el = 0

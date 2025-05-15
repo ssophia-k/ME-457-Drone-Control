@@ -27,3 +27,5 @@ class MsgSensors:
         self.gps_h = 0  # gps altitude
         self.gps_Vg = 0  # gps ground speed
         self.gps_course = 0  # gps course angle
+        
+        

@@ -175,4 +175,9 @@ class MavDynamics(DynamicsForces):
         self.true_state.r = self._state.item(12)
         self.true_state.wn = self._wind.item(0)
         self.true_state.we = self._wind.item(1)
+        self.true_state.bx = 0
+        self.true_state.by = 0
+        self.true_state.bz = 0
+        self.true_state.camera_az = 0
+        self.true_state.camera_el = 0
 
