@@ -27,10 +27,10 @@ def run_simulation(Qlat_params, Qlon_params, Rlat_params, Rlon_params):
     Run simulation with given LQR gain parameters and compute performance metrics
     """
     # Ensure all parameters are positive
-    Qlat_params = np.maximum(np.abs(Qlat_params), 0.01)
-    Qlon_params = np.maximum(np.abs(Qlon_params), 0.01)
-    Rlat_params = np.maximum(np.abs(Rlat_params), 0.01)
-    Rlon_params = np.maximum(np.abs(Rlon_params), 0.01)
+    Qlat_params = np.maximum(Qlat_params, 0.00001)
+    Qlon_params = np.maximum(Qlon_params, 0.00001)
+    Rlat_params = np.maximum(Rlat_params, 0.00001)
+    Rlon_params = np.maximum(Rlon_params, 0.00001)
 
     # Reset simulation components
     wind = WindSimulation(SIM.ts_simulation)
@@ -184,6 +184,8 @@ def genetic_optimize():
 
     # Evaluation function
     def evaluate(individual):
+        clipped = np.maximum(individual, 0.00001)
+        individual[:] = clipped.tolist()
         Qlat_params = individual[:6]
         Qlon_params = individual[6:13]
         Rlat_params = individual[13:15]
@@ -193,14 +195,18 @@ def genetic_optimize():
     # Genetic operators
     toolbox.register("evaluate", evaluate)
     toolbox.register("mate", tools.cxBlend, alpha=0.5)
-    toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=0.5, indpb=0.2)
-    toolbox.register("select", tools.selTournament, tournsize=3)
+    toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=0.5, indpb=0.4)
+    toolbox.register("select", tools.selTournament, tournsize=5 )
+    
 
     # Genetic Algorithm parameters
-    population_size = 20
+    population_size = 30
     num_generations = 10
     crossover_prob = 0.7
     mutation_prob = 0.2
+
+    # Hall of fame
+    hof = tools.HallOfFame(1)     
 
     # Initial population
     population = toolbox.population(n=population_size)
@@ -219,11 +225,14 @@ def genetic_optimize():
         mutpb=mutation_prob, 
         ngen=num_generations, 
         stats=stats, 
+        halloffame=hof,
         verbose=True
     )
+    
 
     # Find the best individual
-    best_ind = tools.selBest(population, k=1)[0]
+    #best_ind = tools.selBest(population, k=1)[0]
+    best_ind = hof[0]   
     best_Qlat = best_ind[:6]
     best_Qlon = best_ind[6:13]
     best_Rlat = best_ind[13:15]

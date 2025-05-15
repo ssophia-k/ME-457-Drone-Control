@@ -4,6 +4,10 @@ autopilot block for mavsim_python
     - Last Update:
         2/10/22 - RWB
 """
+import os
+import sys
+from pathlib import Path
+sys.path.insert(0, os.fspath(Path(__file__).parents[1]))
 import numpy as np
 from numpy import array, sin, cos, radians, concatenate, zeros, diag
 from scipy.linalg import solve_continuous_are, inv
@@ -48,8 +52,12 @@ class Autopilot:
                     concatenate((HLat, zeros((1,1))), axis=1)),
                     axis=0)
         BBlat = concatenate((M.B_lat, zeros((1,2))), axis=0)
-        Qlat = diag([0.5, 0.5, 10, 3, 1, 2]) # v, p, r, phi, chi, intChi
-        Rlat = diag([0.6, 0.7]) # a, r
+        Qlat = diag([1.0630512837686754, 0.23599025591755637, 62.21729969312978, 95.37315384982011, 20.252079211080726, 6.81487515799152])
+        #Qlat = diag([0.4405667646428851, 15.379731760011095, 9.548903024097967, 6.809378468499397, 4.661854580754352, 2.0466122575977224])
+        #Qlat = diag([0.5, 0.5, 10, 3, 1, 2]) # v, p, r, phi, chi, intChi
+        Rlat= diag( [0.010871533965536934, 0.14501065018899012])
+        #Rlat = diag([6.1077833940046995, 0.5729965827359971])
+        #Rlat = diag([0.6, 0.7]) # a, r
         Plat = solve_continuous_are(AAlat, BBlat, Qlat, Rlat)
         self.Klat = inv(Rlat) @ BBlat.T @ Plat
         
@@ -59,8 +67,12 @@ class Autopilot:
                     concatenate((HLon, zeros((2,2))), axis=1)),
                     axis=0)
         BBlon = concatenate((M.B_lon, zeros((2, 2))), axis=0)
-        Qlon = diag([1, 0.15, 0.25, 15.0, 25, 1.5, 8]) # u, w, q, theta, h, intH, intVa
-        Rlon = diag([2.7, 0.25])  # e, t
+        Qlon = diag([0.02226678707824403, 0.028634213910901502, 0.01978999042561993, 2.954074113117723, 56.48132315404608, 7.1351446208139215, 1.9408213204443274])
+        #Qlon = diag([7.416286933988281, 6.411348808270157, 7.4762396161909, 0.015821286260794373, 0.2731006733631573, 7.923826245867336, 0.3038188565556694])
+        #Qlon = diag([1, 0.15, 0.25, 15.0, 25, 1.5, 8]) # u, w, q, theta, h, intH, intVa
+        Rlon = diag( [0.017348572749914807, 8.22778509037248])
+        #Rlon = diag([0.0986341908363526, 1.4591418998271717])
+        #Rlon = diag([2.7, 0.25])  # e, t
         Plon = solve_continuous_are(AAlon, BBlon, Qlon, Rlon)
         self.Klon = inv(Rlon) @ BBlon.T @ Plon
         

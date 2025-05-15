@@ -15,7 +15,7 @@ import Parameters.simulation_parameters as SIM
 from viewers.mav_viewer import MavViewer
 from viewers.data_viewer import DataViewer
 from Models.wind import WindSimulation
-from Controllers.autopilot import Autopilot
+from Controllers.autopilot_lqr import Autopilot
 from Models.sensors import MavDynamics
 from Estimators.observer import Observer
 #from chap8.observer_full import Observer
