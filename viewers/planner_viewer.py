@@ -10,7 +10,7 @@ import numpy as np
 #from message_types.msg_waypoints import MsgWaypoints
 from viewers.draw_waypoints import DrawWaypoints
 from viewers.draw_map import DrawMap
-from planners.dubins_parameters import DubinsParameters
+from Planners.dubins_parameters import DubinsParameters
 #import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 

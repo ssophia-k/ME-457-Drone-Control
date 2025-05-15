@@ -6,7 +6,7 @@ target geolocation algorithm
         4/6/2022 - RWB
         7/13/2023 - RWB
 """
-from plotter import Plotter
+from plotter import plotter
 
 class GeolocationViewer:
     def __init__(self, app,  dt = 0.01,
@@ -17,7 +17,7 @@ class GeolocationViewer:
         self._data_window_length= time_window_length/data_recording_period
         self._update_counter = 0
         self._plots_per_row = 4
-        self._plotter = Plotter(app=app, plots_per_row=self._plots_per_row, 
+        self._plotter = plotter(app=app, plots_per_row=self._plots_per_row, 
                                 window_width=1280, window_height=300)  # plot last time_window seconds of data
         self._plot_period = plot_period
         self._data_recording_period = data_recording_period

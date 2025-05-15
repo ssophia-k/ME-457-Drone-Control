@@ -37,7 +37,7 @@ class MavDynamics(MavDynamicsNoSensors):
 
         # simulate accelerometers(units of g)
         gravity = 9.81
-        forces_body = self._forces_moments()[0:3]
+        forces_body = self._forces[0:3]
         phi, theta, psi = quaternion_to_euler(self._state[6:10])
         R = euler_to_rotation(phi, theta, psi)
         g_vector = np.array([[0.0], [0.0], [gravity]])
@@ -74,9 +74,9 @@ class MavDynamics(MavDynamicsNoSensors):
         
         # simulate GPS sensor
         if self._t_gps >= SENSOR.ts_gps:
-            self._gps_eta_n = np.exp(-SENSOR.gps_beta * SENSOR.ts_gps) * self._gps_eta_n + np.random.normal(0, SENSOR.gps_n_sigma)
-            self._gps_eta_e = np.exp(-SENSOR.gps_beta * SENSOR.ts_gps) * self._gps_eta_e + np.random.normal(0, SENSOR.gps_e_sigma)
-            self._gps_eta_h = np.exp(-SENSOR.gps_beta * SENSOR.ts_gps) * self._gps_eta_h + np.random.normal(0, SENSOR.gps_h_sigma)
+            self._gps_eta_n = np.exp(-SENSOR.gps_k * SENSOR.ts_gps) * self._gps_eta_n + np.random.normal(0, SENSOR.gps_n_sigma)
+            self._gps_eta_e = np.exp(-SENSOR.gps_k * SENSOR.ts_gps) * self._gps_eta_e + np.random.normal(0, SENSOR.gps_e_sigma)
+            self._gps_eta_h = np.exp(-SENSOR.gps_k * SENSOR.ts_gps) * self._gps_eta_h + np.random.normal(0, SENSOR.gps_h_sigma)
             self._sensors.gps_n = self._state.item(0) + self._gps_eta_n
             self._sensors.gps_e = self._state.item(1) + self._gps_eta_e
             self._sensors.gps_h = -self._state.item(2) + self._gps_eta_h
@@ -120,5 +120,3 @@ class MavDynamics(MavDynamicsNoSensors):
         self.true_state.bx = SENSOR.gyro_x_bias
         self.true_state.by = SENSOR.gyro_y_bias
         self.true_state.bz = SENSOR.gyro_z_bias
-        # self.true_state.camera_az = self._state.item(13)
-        # self.true_state.camera_el = self._state.item(14)

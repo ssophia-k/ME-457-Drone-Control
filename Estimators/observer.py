@@ -265,3 +265,25 @@ class Observer:
         # Enforce wind constraints using airspeed and ground speed
         Vn = Vg * np.cos(chi)
         Ve = Vg * np.sin(chi)
+        
+        y = np.array([
+            [pn], 
+            [pe], 
+            [Vn - wn],  # Ground speed in North should match wind + airspeed
+            [Ve - we]   # Ground speed in East should match wind + airspeed
+        ])
+        return y
+
+    def h_gps(self, x: np.ndarray, u: np.ndarray)->np.ndarray:
+        '''
+            measurement model for gps measurements: y=y(x, u)
+                x = [pn, pe, Vg, chi, wn, we, psi].T
+                u = [p, q, r, Va, phi, theta].T
+            returns
+                y = [pn, pe, Vg, chi]
+        '''
+        ##### TODO #####         
+        pn, pe, Vg, chi, wn, we, psi = x.flatten()
+
+        y = np.array([[pn], [pe], [Vg], [chi]])
+        return y

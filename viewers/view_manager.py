@@ -7,22 +7,22 @@ mavsim: manage_viewers
 """
 import pyqtgraph as pg
 from viewers.mav_viewer import MavViewer
-from viewers.mav_viewer_path import MavAndPathViewer
-from viewers.mav_viewer_waypoint import MAVAndWaypointViewer
-from viewers.mav_viewer_map import MAVWorldViewer
+from viewers.mav_path_viewer import MavAndPathViewer
+from viewers.mav_waypoint_viewer import MAVAndWaypointViewer
+from viewers.mav_world_viewer import MAVWorldViewer
 from viewers.mav_viewer_camera import MAVWorldCameraViewer
 from viewers.planner_viewer import PlannerViewer
 from viewers.data_viewer import DataViewer
 from viewers.sensor_viewer import SensorViewer
 from viewers.camera_viewer import CameraViewer
 from viewers.geolocation_viewer import GeolocationViewer
-import parameters.simulation_parameters as SIM
-from message_types.msg_state import MsgState
-from message_types.msg_delta import MsgDelta
-from message_types.msg_sensors import MsgSensors
-from message_types.msg_path import MsgPath
-from message_types.msg_waypoints import MsgWaypoints
-from message_types.msg_world_map import MsgWorldMap
+import Parameters.simulation_parameters as SIM
+from Message_types.state import State
+from Message_types.delta import Delta
+from Message_types.sensors import MsgSensors
+from Message_types.msg_path import MsgPath
+from Message_types.msg_waypoints import MsgWaypoints
+from Message_types.msg_world_map import MsgWorldMap
 
 class ViewManager:
     def __init__(self, 
@@ -97,10 +97,10 @@ class ViewManager:
 
     def update(self,
                sim_time: float,
-               true_state: MsgState=None, 
-               estimated_state: MsgState=None, 
-               commanded_state: MsgState=None, 
-               delta: MsgDelta=None,
+               true_state: State=None, 
+               estimated_state: State=None, 
+               commanded_state: State=None, 
+               delta: Delta=None,
                measurements: MsgSensors=None,
                path: MsgPath=None,
                waypoints: MsgWaypoints=None,
