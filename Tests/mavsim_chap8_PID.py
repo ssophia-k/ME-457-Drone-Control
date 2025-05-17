@@ -14,11 +14,11 @@ import Parameters.simulation_parameters as SIM
 
 from viewers.mav_viewer import MavViewer
 from viewers.data_viewer import DataViewer
+from viewers.sensor_viewer import SensorViewer
 from Models.wind import WindSimulation
 from Controllers.autopilot_lqr import Autopilot
 from Models.sensors import MavDynamics
 from Estimators.observer import Observer
-#from chap8.observer_full import Observer
 from Tools.signals import Signals
 from PyQt5 import QtWidgets
 import Models.model_coef as M
@@ -30,6 +30,7 @@ app = QtWidgets.QApplication([])
 VIDEO = False  # True==write video, False==don't write video
 mav_view = MavViewer(app)  # initialize the mav viewer
 data_view = DataViewer(app)  # initialize view of data plots
+sensor_view = SensorViewer(app)
 if VIDEO is True:
     from viewers.video_writer import VideoWriter
     video = VideoWriter(video_name="chap8_video.avi",
@@ -77,8 +78,8 @@ while sim_time < SIM.end_time:
     # -------autopilot-------------
     measurements = mav.sensors()  # get sensor measurements
     estimated_state = observer.update(measurements)  # estimate states from measurements
-    delta, commanded_state = autopilot.update(commands, estimated_state)
-    # delta, commanded_state = autopilot.update(commands, mav.true_state)
+    # delta, commanded_state = autopilot.update(commands, estimated_state)
+    delta, commanded_state = autopilot.update(commands, mav.true_state)
 
     # -------physical system-------------
     current_wind = wind.update()  # get the new wind vector
@@ -90,6 +91,7 @@ while sim_time < SIM.end_time:
                      estimated_state,  # estimated states
                      commanded_state,  # commanded states
                      delta)  # input to aircraft
+    sensor_view.update(measurements)  # input to aircraft
     
     if VIDEO is True:
         video.update(sim_time)
