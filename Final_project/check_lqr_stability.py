@@ -46,6 +46,7 @@ S = np.diag(s)
 r = (s > 1e-12*s[0]).sum() # numberical rank (compare to the first singular value to find effectively zero values)
 print(r) #rank = 5, which is good because it matches the rank of the controllability matrix
 cntrl_basis = U[:, :5] # matrix where each column is a basis vector for the controllable subspace
+print(cntrl_basis)
 
 
 tol_rel = 1e-10        # a numrerical tolerance that is close to zero
